@@ -1,6 +1,8 @@
 package com.github.simplestep.grpc.greeting.client;
 
 import com.proto.dummy.DummyServiceGrpc;
+import com.proto.greet.GreetEveryoneRequest;
+import com.proto.greet.GreetEveryoneResponse;
 import com.proto.greet.GreetManyTimesRequest;
 import com.proto.greet.GreetRequest;
 import com.proto.greet.GreetResponse;
@@ -12,6 +14,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +34,9 @@ public class GreetingClient {
 
 //        doUnaryCall(channel);
 //        doServerStreamingCall(channel);
-        doClientStreamingCall(channel);
+//        doClientStreamingCall(channel);
+
+        doBiDiStreaming(channel);
 
         // do something
         System.out.println("Shutting down channel");
@@ -130,6 +135,49 @@ public class GreetingClient {
                 .build());
 
         // we tell the server taht the client is done sending data
+        requestObserver.onCompleted();
+
+        try {
+            latch.await(3L, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void doBiDiStreaming(ManagedChannel channel) {
+        GreetServiceGrpc.GreetServiceStub asyncClient = GreetServiceGrpc.newStub(channel);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<GreetEveryoneRequest> requestObserver = asyncClient.greetEveryone(new StreamObserver<GreetEveryoneResponse>() {
+            @Override
+            public void onNext(GreetEveryoneResponse value) {
+                System.out.println("Response from server: " + value.getResult());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("Server is done sending data");
+                latch.countDown();
+            }
+        });
+
+        Arrays.asList("Stephane", "John", "Marc", "Patricia").forEach(name -> {
+            System.out.println("Sending: " + name);
+            requestObserver.onNext(GreetEveryoneRequest.newBuilder()
+                    .setGreeting(Greeting.newBuilder().setFirstName(name).build()).build());
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
         requestObserver.onCompleted();
 
         try {

@@ -1,5 +1,7 @@
 package com.github.simplestep.grpc.greeting.server;
 
+import com.proto.greet.GreetEveryoneRequest;
+import com.proto.greet.GreetEveryoneResponse;
 import com.proto.greet.GreetManyTimesRequest;
 import com.proto.greet.GreetManyTimesResponse;
 import com.proto.greet.GreetRequest;
@@ -81,6 +83,30 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
                 responseObserver.onCompleted();
                 // this is when we want to return a response (responseobserver)
 
+            }
+        };
+
+        return requestObserver;
+    }
+
+    @Override
+    public StreamObserver<GreetEveryoneRequest> greetEveryone(StreamObserver<GreetEveryoneResponse> responseObserver) {
+        StreamObserver<GreetEveryoneRequest> requestObserver = new StreamObserver<GreetEveryoneRequest>() {
+            @Override
+            public void onNext(GreetEveryoneRequest value) {
+                String response = "Hello " + value.getGreeting().getFirstName();
+                responseObserver.onNext(GreetEveryoneResponse.newBuilder()
+                        .setResult(response).build());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onCompleted();
             }
         };
 
