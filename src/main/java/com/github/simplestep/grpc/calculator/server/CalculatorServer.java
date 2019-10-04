@@ -14,6 +14,8 @@ public class CalculatorServer {
 
         server.start();
 
+        System.out.println("server started on 50052");
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Received Shutdown Request");;
             server.shutdown();
