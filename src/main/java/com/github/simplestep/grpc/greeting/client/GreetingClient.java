@@ -1,6 +1,7 @@
 package com.github.simplestep.grpc.greeting.client;
 
 import com.proto.dummy.DummyServiceGrpc;
+import com.proto.greet.GreetManyTimesRequest;
 import com.proto.greet.GreetRequest;
 import com.proto.greet.GreetResponse;
 import com.proto.greet.GreetServiceGrpc;
@@ -24,21 +25,35 @@ public class GreetingClient {
         // created a greet service client (blocking - synchronous)
         GreetServiceGrpc.GreetServiceBlockingStub greetClient = GreetServiceGrpc.newBlockingStub(channel);
 
-        // created a protocol buffer greeting message
-        Greeting greeting = Greeting.newBuilder()
-                .setFirstName("Stephane")
-                .setLastName("Maarek")
+        // Unary
+//        // created a protocol buffer greeting message
+//        Greeting greeting = Greeting.newBuilder()
+//                .setFirstName("Stephane")
+//                .setLastName("Maarek")
+//                .build();
+//
+//        // do the same for a GreetRequest
+//        GreetRequest greetRequest = GreetRequest.newBuilder()
+//                .setGreeting(greeting)
+//                .build();
+//
+//        // call the RPC and get back a GreetResponse (protocol buffers)
+//        GreetResponse greetResponse = greetClient.greet(greetRequest);
+//
+//        System.out.println("greetResponse : " + greetResponse.getResult());
+
+
+        // Server Streaming
+        // we prepare the request
+        GreetManyTimesRequest greetManyTimesRequest = GreetManyTimesRequest.newBuilder()
+                .setGreeting(Greeting.newBuilder().setFirstName("Stephane"))
                 .build();
 
-        // do the same for a GreetRequest
-        GreetRequest greetRequest = GreetRequest.newBuilder()
-                .setGreeting(greeting)
-                .build();
-
-        // call the RPC and get back a GreetResponse (protocol buffers)
-        GreetResponse greetResponse = greetClient.greet(greetRequest);
-
-        System.out.println("greetResponse : " + greetResponse.getResult());
+        // we stream the responses (in a blocking manner)
+        greetClient.greetManyTimes(greetManyTimesRequest)
+                .forEachRemaining(greetManyTimesResponse -> {
+                    System.out.println("greetManyTimesResponse result : " + greetManyTimesResponse.getResult());
+                });
 
         // do something
         System.out.println("Shutting down channel");
