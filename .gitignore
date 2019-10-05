@@ -89,3 +89,9 @@ atlassian-ide-plugin.xml
 
 # oh-my-zsh gradle plugin
 .gradletasknamecache
+
+# ssl
+*.crt
+*.key
+*.pem
+*.csr
