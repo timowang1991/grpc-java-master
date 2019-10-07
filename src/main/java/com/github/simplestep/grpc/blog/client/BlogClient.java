@@ -4,6 +4,8 @@ import com.proto.blog.Blog;
 import com.proto.blog.BlogServiceGrpc;
 import com.proto.blog.CreateBlogRequest;
 import com.proto.blog.CreateBlogResponse;
+import com.proto.blog.ReadBlogRequest;
+import com.proto.blog.ReadBlogResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
@@ -19,6 +21,8 @@ public class BlogClient {
                 .build();
 
         createBlog(channel);
+        readBlog(channel);
+        readBlogNotFound(channel);
 
         System.out.println("client channel shutdown");
 
@@ -38,6 +42,28 @@ public class BlogClient {
                 .setBlog(blog).build());
 
         System.out.println("Received create blog response");
+        System.out.println(response.toString());
+    }
+
+    private void readBlog(ManagedChannel channel) {
+        System.out.println("Reading blog...");
+        BlogServiceGrpc.BlogServiceBlockingStub blogClient = BlogServiceGrpc.newBlockingStub(channel);
+
+        ReadBlogResponse response = blogClient.readBlog(ReadBlogRequest.newBuilder()
+                .setBlogId("5d9b35d95fe3c17017febcca")
+                .build());
+
+        System.out.println(response.toString());
+    }
+
+    private void readBlogNotFound(ManagedChannel channel) {
+        System.out.println("Reading blog with non existing id...");
+        BlogServiceGrpc.BlogServiceBlockingStub blogClient = BlogServiceGrpc.newBlockingStub(channel);
+
+        ReadBlogResponse response = blogClient.readBlog(ReadBlogRequest.newBuilder()
+                .setBlogId("5d9b35d95fe3c17017febccb")
+                .build());
+
         System.out.println(response.toString());
     }
 }
