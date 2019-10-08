@@ -6,6 +6,8 @@ import com.proto.blog.CreateBlogRequest;
 import com.proto.blog.CreateBlogResponse;
 import com.proto.blog.DeleteBlogRequest;
 import com.proto.blog.DeleteBlogResponse;
+import com.proto.blog.ListBlogRequest;
+import com.proto.blog.ListBlogResponse;
 import com.proto.blog.ReadBlogRequest;
 import com.proto.blog.ReadBlogResponse;
 import com.proto.blog.UpdateBlogRequest;
@@ -29,7 +31,8 @@ public class BlogClient {
 //        readBlogNotFound(channel);
 //        updateBlog(channel);
 
-        deleteBlog(channel);
+//        deleteBlog(channel);
+        listBlog(channel);
 
         System.out.println("client channel shutdown");
 
@@ -101,5 +104,14 @@ public class BlogClient {
 
         System.out.println("Deleted blog");
         System.out.println(response.toString());
+    }
+
+    private void listBlog(ManagedChannel channel) {
+        BlogServiceGrpc.BlogServiceBlockingStub blogClient = BlogServiceGrpc.newBlockingStub(channel);
+
+        // we list the blogs in our database
+        blogClient.listBlog(ListBlogRequest.newBuilder().build()).forEachRemaining(
+                listBlogResponse -> System.out.println(listBlogResponse.getBlog().toString())
+        );
     }
 }
