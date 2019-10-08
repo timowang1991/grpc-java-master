@@ -5,10 +5,13 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
 import com.proto.blog.Blog;
 import com.proto.blog.BlogServiceGrpc;
 import com.proto.blog.CreateBlogRequest;
 import com.proto.blog.CreateBlogResponse;
+import com.proto.blog.DeleteBlogRequest;
+import com.proto.blog.DeleteBlogResponse;
 import com.proto.blog.ReadBlogRequest;
 import com.proto.blog.ReadBlogResponse;
 import com.proto.blog.UpdateBlogRequest;
@@ -132,6 +135,38 @@ public class BlogServiceImpl extends BlogServiceGrpc.BlogServiceImplBase {
             );
             responseObserver.onCompleted();
         }
+    }
+
+    @Override
+    public void deleteBlog(DeleteBlogRequest request, StreamObserver<DeleteBlogResponse> responseObserver) {
+        System.out.println("Received Delete Blog Response");
+        String blogId = request.getBlogId();
+
+        DeleteResult deleteResult;
+        try {
+            deleteResult = collection.deleteOne(Filters.eq("_id", new ObjectId(blogId)));
+        } catch (Exception e) {
+            System.out.println("Blog not found");
+            responseObserver.onError(Status.NOT_FOUND
+                    .withDescription("The blog with the corresponding id was not found")
+                    .augmentDescription(e.getLocalizedMessage())
+                    .asRuntimeException()
+            );
+            return;
+        }
+
+        if (deleteResult.getDeletedCount() == 0) {
+            System.out.println("Blog not found");
+            responseObserver.onError(Status.NOT_FOUND
+                    .withDescription("The blog with the corresponding id was not found")
+                    .asRuntimeException()
+            );
+        } else {
+            System.out.println("Blog was deleted");
+            responseObserver.onNext(DeleteBlogResponse.newBuilder().setBlogId(blogId).build());
+            responseObserver.onCompleted();
+        }
+
     }
 
     private Blog documentToBlog(Document document) {

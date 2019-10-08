@@ -4,6 +4,8 @@ import com.proto.blog.Blog;
 import com.proto.blog.BlogServiceGrpc;
 import com.proto.blog.CreateBlogRequest;
 import com.proto.blog.CreateBlogResponse;
+import com.proto.blog.DeleteBlogRequest;
+import com.proto.blog.DeleteBlogResponse;
 import com.proto.blog.ReadBlogRequest;
 import com.proto.blog.ReadBlogResponse;
 import com.proto.blog.UpdateBlogRequest;
@@ -25,7 +27,9 @@ public class BlogClient {
 //        createBlog(channel);
 //        readBlog(channel);
 //        readBlogNotFound(channel);
-        updateBlog(channel);
+//        updateBlog(channel);
+
+        deleteBlog(channel);
 
         System.out.println("client channel shutdown");
 
@@ -85,6 +89,17 @@ public class BlogClient {
                 .setBlog(newBlog).build());
 
         System.out.println("Updated blog");
+        System.out.println(response.toString());
+    }
+
+    private void deleteBlog(ManagedChannel channel) {
+        BlogServiceGrpc.BlogServiceBlockingStub blogClient = BlogServiceGrpc.newBlockingStub(channel);
+
+        DeleteBlogRequest request = DeleteBlogRequest.newBuilder().setBlogId("5d9b35d95fe3c17017febcca").build();
+
+        DeleteBlogResponse response = blogClient.deleteBlog(request);
+
+        System.out.println("Deleted blog");
         System.out.println(response.toString());
     }
 }
