@@ -6,6 +6,8 @@ import com.proto.blog.CreateBlogRequest;
 import com.proto.blog.CreateBlogResponse;
 import com.proto.blog.ReadBlogRequest;
 import com.proto.blog.ReadBlogResponse;
+import com.proto.blog.UpdateBlogRequest;
+import com.proto.blog.UpdateBlogResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
@@ -20,9 +22,10 @@ public class BlogClient {
                 .usePlaintext()
                 .build();
 
-        createBlog(channel);
-        readBlog(channel);
-        readBlogNotFound(channel);
+//        createBlog(channel);
+//        readBlog(channel);
+//        readBlogNotFound(channel);
+        updateBlog(channel);
 
         System.out.println("client channel shutdown");
 
@@ -64,6 +67,24 @@ public class BlogClient {
                 .setBlogId("5d9b35d95fe3c17017febccb")
                 .build());
 
+        System.out.println(response.toString());
+    }
+
+    private void updateBlog(ManagedChannel channel) {
+        BlogServiceGrpc.BlogServiceBlockingStub blogClient = BlogServiceGrpc.newBlockingStub(channel);
+
+        Blog newBlog = Blog.newBuilder()
+                .setId("5d9b35d95fe3c17017febcca")
+                .setAuthorId("Changed Author")
+                .setTitle("New blog (updated)!")
+                .setContent("Hellow world this is my first blog! I've added some more content")
+                .build();
+
+        System.out.println("Updating blog...");
+        UpdateBlogResponse response = blogClient.updateBlog(UpdateBlogRequest.newBuilder()
+                .setBlog(newBlog).build());
+
+        System.out.println("Updated blog");
         System.out.println(response.toString());
     }
 }
