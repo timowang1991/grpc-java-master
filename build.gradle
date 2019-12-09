@@ -45,3 +45,13 @@ protobuf {
         }
     }
 }
+
+task runServer(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main = "com.github.simplestep.grpc.greeting.server.GreetingServer"
+}
+
+task runClient(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main = "com.github.simplestep.grpc.greeting.client.GreetingClient"
+}
